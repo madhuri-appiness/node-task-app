@@ -1,9 +1,5 @@
 //CRUD operations
 
-// const mongodb = require('mongodb');
-// const MongoClient = mongodb.MongoClient;
-// const ObjectID = mongodb.ObjectID;
-
 // using destructure
 const { MongoClient, ObjectID } = require('mongodb')
 
