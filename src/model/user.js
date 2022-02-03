@@ -11,7 +11,7 @@ const userSchema = new mongoose.Schema({
     },
     email: {
         type: String,
-        unique:true,
+        unique: true,
         required: true,
         trim: true,
         lowercase: true,
@@ -41,24 +41,34 @@ const userSchema = new mongoose.Schema({
             }
         }
     },
-    tokens:[{
-        token:{
-         type:String,
-         required:true   
+    tokens: [{
+        token: {
+            type: String,
+            required: true
         }
     }]
 })
 
+
+// relationship between User And Task(to know the tasks by the user)
+userSchema.virtual('tasks',
+    {
+        ref: 'Task',
+        localField: '_id', //to have relation bw Task and owner of the task
+        foreignField: 'owner'
+    }
+)
+
 //generate web token
-userSchema.methods.generateAuthToken= async function(){
+userSchema.methods.generateAuthToken = async function () {
     const user = this;
-    const token = jwt.sign({_id:user._id.toString()},'thisismynodeapp');
-    user.tokens = user.tokens.concat({token});
+    const token = jwt.sign({ _id: user._id.toString() }, 'thisismynodeapp');
+    user.tokens = user.tokens.concat({ token });
     await user.save();
     return token;
 }
 
-userSchema.methods.toJSON= function(){
+userSchema.methods.toJSON = function () {
     const user = this;
     const userObj = user.toObject();
 
@@ -68,24 +78,24 @@ userSchema.methods.toJSON= function(){
 }
 
 // find user by login credentials
-userSchema.statics.findCredentials = async (email,password) =>{
-    const user = await User.findOne({email:email})
-    if(!user){
+userSchema.statics.findCredentials = async (email, password) => {
+    const user = await User.findOne({ email: email })
+    if (!user) {
         throw new Error('Unable to login!')
     }
-    const isMatch = await bcrypt.compare(password,user.password);
+    const isMatch = await bcrypt.compare(password, user.password);
 
-    if(!isMatch){
+    if (!isMatch) {
         throw new Error('Unable to login!')
     }
     return user;
 }
 
 // hash the plain text password
-userSchema.pre('save', async function(next){
+userSchema.pre('save', async function (next) {
     const user = this
-    if(user.isModified('password')){
-        user.password = await bcrypt.hash(user.password,8);
+    if (user.isModified('password')) {
+        user.password = await bcrypt.hash(user.password, 8);
     }
     next()
 });
