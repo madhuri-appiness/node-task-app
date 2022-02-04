@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const Task = require('./task')
 
 const userSchema = new mongoose.Schema({
     name: {
@@ -68,6 +69,7 @@ userSchema.methods.generateAuthToken = async function () {
     return token;
 }
 
+// removing password and tokens while sending response from user obj
 userSchema.methods.toJSON = function () {
     const user = this;
     const userObj = user.toObject();
@@ -91,14 +93,22 @@ userSchema.statics.findCredentials = async (email, password) => {
     return user;
 }
 
-// hash the plain text password
+// hash the plain text password before saving user details password
 userSchema.pre('save', async function (next) {
     const user = this
     if (user.isModified('password')) {
         user.password = await bcrypt.hash(user.password, 8);
     }
-    next()
+    next();
 });
+
+// delete user tasks before you remove/delete the user
+userSchema.pre('remove', async function (next) {
+    const user = this;
+    await Task.deleteMany({ owner: user._id });
+
+    next();
+})
 
 const User = mongoose.model('User', userSchema);
 
