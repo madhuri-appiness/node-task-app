@@ -47,7 +47,10 @@ const userSchema = new mongoose.Schema({
             type: String,
             required: true
         }
-    }]
+    }],
+    avatar:{
+        type:Buffer
+    }
 },{
     timestamps:true
 })
@@ -65,7 +68,7 @@ userSchema.virtual('tasks',
 //generate web token
 userSchema.methods.generateAuthToken = async function () {
     const user = this;
-    const token = jwt.sign({ _id: user._id.toString() }, 'thisismynodeapp');
+    const token = jwt.sign({ _id: user._id.toString() }, process.env.JWT_SECRET);
     user.tokens = user.tokens.concat({ token });
     await user.save();
     return token;
@@ -78,6 +81,7 @@ userSchema.methods.toJSON = function () {
 
     delete userObj.password;
     delete userObj.tokens;
+    delete userObj.avatar;
     return userObj;
 }
 
