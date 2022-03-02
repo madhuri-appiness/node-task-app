@@ -18,11 +18,6 @@ router.post('/users', async (req, res) => {
     } catch (e) {
         res.status(400).send(e)
     }
-    // user.save().then(() => {
-    //     res.status(201).send(user)
-    // }).catch(e => {
-    //     res.status(400).send(e);
-    // })
 })
 
 //login user
@@ -51,7 +46,7 @@ router.patch('/users/me', auth, async (req, res) => {
     const isValidUpdate = updates.every(key => allowedUpdates.includes(key));
 
     if (!isValidUpdate) {
-        res.status(404).send({ error: 'Invalid update' })
+        res.status(400).send({ error: 'Invalid update' })
     }
     try {
         //below direct update in db
@@ -64,7 +59,7 @@ router.patch('/users/me', auth, async (req, res) => {
         await user.save()
         res.send(user)
     } catch (e) {
-        res.status(400).send(e)
+        res.status(400).send()
     }
 })
 
